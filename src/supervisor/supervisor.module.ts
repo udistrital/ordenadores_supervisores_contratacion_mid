@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { SuperService } from './supervisor.service';
-import { OrdenadorController } from './ordenador.controller';
+import { SupervisorService } from './supervisor.service';
+import { SupervisorController } from './supervisor.controller';
 
 @Module({
   imports: [HttpModule],
-  controllers: [OrdenadorController],
-  providers: [OrdenadorService],
+  controllers: [SupervisorController],
+  providers: [SupervisorService],
 })
-export class OrdenadorModule {}
+export class SupervisorModule {}

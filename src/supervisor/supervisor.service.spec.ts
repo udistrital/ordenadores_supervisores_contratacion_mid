@@ -1,0 +1,20 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { HttpModule } from '@nestjs/axios';
+import { SupervisorService } from './supervisor.service';
+
+describe('SupervisorService', () => {
+  let service: SupervisorService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [HttpModule],
+      providers: [SupervisorService],
+    }).compile();
+
+    service = module.get<SupervisorService>(SupervisorService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
