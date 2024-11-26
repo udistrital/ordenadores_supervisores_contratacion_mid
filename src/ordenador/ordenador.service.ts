@@ -1,22 +1,22 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { OrdenadorQueryDto } from './dto/ordenador-dto';
+import { ConfigService } from '@nestjs/config';
+import axios, { AxiosInstance } from 'axios';
+import { StandardResponse } from 'src/interfaces/responses.interfaces';
 
 @Injectable()
 export class OrdenadorService {
-  constructor(private readonly httpService: HttpService) {}
+  private readonly axiosInstance: AxiosInstance;
+  constructor(private configService: ConfigService) {}
 
   async getOrdenadores(queryParams: OrdenadorQueryDto) {
-    const apiUrl = 'https://autenticacion.portaloas.udistrital.edu.co/store/apis/info?name=administrativa_amazon_api&version=v1&provider=admin&tenant=carbon.super/ordenador_gasto';
-
     try {
-      const response = await this.httpService.get(apiUrl, {
-        params: queryParams,
-      }).toPromise();
-      
-      return response.data;
+      const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES_SUPERVISORES');
+      const url = `${endpoint}ordenador_gasto`;
+      const { data } = await axios.get<StandardResponse<any>>(url);
+      return data.Data;
     } catch (error) {
-      throw new Error(`Error fetching ordenadores: ${error.message}`);
+      return null;
     }
   }
 }
