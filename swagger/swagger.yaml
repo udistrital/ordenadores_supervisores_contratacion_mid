@@ -1,0 +1,46 @@
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      operationId: AppController_healthCheck
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
+  /ordenador:
+    get:
+      operationId: OrdenadorController_getOrdenadores
+      parameters:
+        - name: rol
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      summary: Consulta ordenadores por rol
+      tags:
+        - Ordenador
+  /supervisor:
+    get:
+      operationId: SupervisorController_getSupervisores
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Supervisor
+info:
+  title: Proveedores API MID
+  description: API
+  version: 1.0.0
+  contact: {}
+tags:
+  - name: API
+    description: ''
+servers: []
+components:
+  schemas: {}
