@@ -1,26 +1,30 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
+import { Ordenador } from 'src/interfaces/internal.interfaces';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
 
 @Injectable()
 export class OrdenadorService {
   constructor(private configService: ConfigService) {}
 
-  async getOrdenadores(rol: string): Promise<StandardResponse<any>> {
+  async getOrdenadores(rol: number): Promise<StandardResponse<Ordenador[]>> {
     try {
       const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES');
-      
-      // Añade el rol como parámetro de consulta si es necesario
-      const url = `${endpoint}`;
-      
-      const { data } = await axios.get(url);
+      const { data } = await axios.get<Ordenador[]>(endpoint);
 
-      if (!data) {
+      const filteredOrdenadores = data.filter(
+        ordenador => {
+          return ordenador.cargoId === rol;
+        }
+      );
+
+      // Si no hay ordenadores para el rol especificado
+      if (filteredOrdenadores.length === 0) {
         return {
           Success: false,
           Status: HttpStatus.NOT_FOUND,
-          Message: 'Rol de ordenador no encontrado',
+          Message: `No se encontraron ordenadores para el cargo ${rol}`,
         };
       }
 
@@ -28,7 +32,7 @@ export class OrdenadorService {
         Success: true,
         Status: HttpStatus.OK,
         Message: 'Ordenadores recuperados exitosamente',
-        Data: data
+        Data: filteredOrdenadores
       };
     } catch (error) {
       return {

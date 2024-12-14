@@ -17,11 +17,17 @@ paths:
           required: true
           in: query
           schema:
-            type: string
+            type: number
       responses:
         '200':
-          description: ''
-      summary: Consulta ordenadores por rol
+          description: Ordenadores encontrados exitosamente
+        '400':
+          description: Solicitud incorrecta
+        '404':
+          description: Ordenadores no encontrados
+        '500':
+          description: Error interno del servidor
+      summary: Consulta ordenadores por cargo
       tags:
         - Ordenador
   /supervisor:
@@ -33,6 +39,36 @@ paths:
           description: ''
       tags:
         - Supervisor
+  /rol-ordenador:
+    get:
+      operationId: RolOrdenadorController_getOrdenadores
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      summary: Consulta roles de ordenadores
+      tags: &ref_0
+        - RolOrdenador
+  /rol-ordenador/actual:
+    get:
+      operationId: RolOrdenadorController_getOrdenadorActual
+      parameters:
+        - name: rol
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ordenador encontrado exitosamente
+        '400':
+          description: Solicitud incorrecta
+        '404':
+          description: Ordenadores no encontrados
+        '500':
+          description: Error interno del servidor
+      summary: Consulta el ordenador actual por cargo
+      tags: *ref_0
 info:
   title: Proveedores API MID
   description: API
