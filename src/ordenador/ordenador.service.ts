@@ -1,22 +1,45 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { OrdenadorQueryDto } from './dto/ordenador-dto';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+import { Ordenador } from 'src/interfaces/internal.interfaces';
+import { StandardResponse } from 'src/interfaces/responses.interfaces';
 
 @Injectable()
 export class OrdenadorService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private configService: ConfigService) {}
 
-  async getOrdenadores(queryParams: OrdenadorQueryDto) {
-    const apiUrl = 'https://autenticacion.portaloas.udistrital.edu.co/store/apis/info?name=administrativa_amazon_api&version=v1&provider=admin&tenant=carbon.super/ordenador_gasto';
-
+  async getOrdenadores(rol: number): Promise<StandardResponse<Ordenador[]>> {
     try {
-      const response = await this.httpService.get(apiUrl, {
-        params: queryParams,
-      }).toPromise();
-      
-      return response.data;
+      const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES');
+      const { data } = await axios.get<Ordenador[]>(endpoint);
+
+      const filteredOrdenadores = data.filter(
+        ordenador => {
+          return ordenador.cargoId === rol;
+        }
+      );
+
+      // Si no hay ordenadores para el rol especificado
+      if (filteredOrdenadores.length === 0) {
+        return {
+          Success: false,
+          Status: HttpStatus.NOT_FOUND,
+          Message: `No se encontraron ordenadores para el cargo ${rol}`,
+        };
+      }
+
+      return {
+        Success: true,
+        Status: HttpStatus.OK,
+        Message: 'Ordenadores recuperados exitosamente',
+        Data: filteredOrdenadores
+      };
     } catch (error) {
-      throw new Error(`Error fetching ordenadores: ${error.message}`);
+      return {
+        Success: false,
+        Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        Message: error.message || 'Error al consultar los ordenadores',
+      };
     }
   }
 }

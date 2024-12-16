@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { SupervisorQueryDto } from './dto/supervisor-dto';
+import { ConfigService } from '@nestjs/config';
+import axios, { AxiosInstance } from 'axios';
+import { StandardResponse } from 'src/interfaces/responses.interfaces';
 
 @Injectable()
 export class SupervisorService {
-  constructor(private readonly httpService: HttpService) {}
+  private readonly axiosInstance: AxiosInstance;
+  constructor(private configService: ConfigService) {}
 
   async getSupervisores(queryParams: SupervisorQueryDto) {
-    const apiUrl = 'https://autenticacion.portaloas.udistrital.edu.co/store/apis/info?name=administrativa_amazon_api&version=v1&provider=admin&tenant=carbon.super/supervisor_contrato';
-
     try {
-      const response = await this.httpService.get(apiUrl, {
-        params: queryParams,
-      }).toPromise();
-      
-      return response.data;
+      const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES_SUPERVISORES');
+      const url = `${endpoint}supervisor_contrato`;
+      const { data } = await axios.get<StandardResponse<any>>(url);
+      return data.Data;
     } catch (error) {
-      throw new Error(`Error fetching supervisores: ${error.message}`);
+      return null;
     }
   }
 }
