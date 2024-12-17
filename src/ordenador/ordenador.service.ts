@@ -14,9 +14,7 @@ export class OrdenadorService {
       const { data } = await axios.get<Ordenador[]>(endpoint);
 
       const filteredOrdenadores = data.filter(
-        ordenador => {
-          return ordenador.cargoId === rol;
-        }
+        ordenador => ordenador.cargo_id === rol
       );
 
       // Si no hay ordenadores para el rol especificado
