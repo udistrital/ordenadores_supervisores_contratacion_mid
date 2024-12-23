@@ -1,11 +1,12 @@
+// internal.interfaces.ts
 export interface Ordenador {
     id: number;
-    terceroId: number;
-    ordenadorArgoId: number;
-    ordenadorSikarcaId: number;
+    tercero_id: number;
+    ordenador_argo_id: number;
+    ordenador_sikarca_id: number;
     resolucion: string;
-    documentoIdentidad: string;
-    cargoId: number;
+    documento_identidad: string;
+    cargo_id: number;
     contrato_general_id: number;
     activo: boolean;
     fecha_creacion: string;

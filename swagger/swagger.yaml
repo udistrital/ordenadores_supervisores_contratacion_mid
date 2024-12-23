@@ -70,7 +70,7 @@ paths:
       summary: Consulta el ordenador actual por cargo
       tags: *ref_0
 info:
-  title: Proveedores API MID
+  title: Ordenadores Supervisores API MID
   description: API
   version: 1.0.0
   contact: {}
