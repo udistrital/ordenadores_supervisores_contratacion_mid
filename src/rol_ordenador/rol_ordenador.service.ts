@@ -92,7 +92,6 @@ export class RolOrdenadorService {
       const endpoint: string =
         this.configService.get<string>('ENDP_ROL_ORDENADOR');
 
-      // Formatear fecha como YYYY-MM-DD
       const fechaActual = new Date().toISOString().split('T')[0];
       const url = `${endpoint}/ordenador_fecha?fecha_fin=${fechaActual}&rol_id=${rol}`;
 
@@ -105,7 +104,7 @@ export class RolOrdenadorService {
         ],
       });
 
-      console.log(response.data);
+      this.logger.log(response.data);
 
       const parsedData = await this.parseResponse(response.data);
 

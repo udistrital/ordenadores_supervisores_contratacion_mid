@@ -11,7 +11,9 @@ export class SupervisorService {
 
   async getSupervisores(queryParams: SupervisorQueryDto) {
     try {
-      const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES_SUPERVISORES');
+      const endpoint: string = this.configService.get<string>(
+        'ENDP_ORDENADORES_SUPERVISORES',
+      );
       const url = `${endpoint}supervisor_contrato`;
       const { data } = await axios.get<StandardResponse<any>>(url);
       return data.Data;

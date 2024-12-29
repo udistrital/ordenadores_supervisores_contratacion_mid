@@ -1,11 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Query, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { RolOrdenadorService } from './rol_ordenador.service';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('rol-ordenador')
 export class RolOrdenadorController {
-  constructor(private readonly rolOrdenadorService: RolOrdenadorService) { }
+  constructor(private readonly rolOrdenadorService: RolOrdenadorService) {}
 
   @Get('')
   @ApiOperation({ summary: 'Consulta roles de ordenadores' })
@@ -29,9 +35,13 @@ export class RolOrdenadorController {
   @ApiResponse({ status: 404, description: 'Ordenadores no encontrados' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   async getOrdenadorActual(
-    @Query('rol', new ParseIntPipe({
-      errorHttpStatusCode: HttpStatus.BAD_REQUEST
-    })) rol: number,
+    @Query(
+      'rol',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    rol: number,
   ): Promise<StandardResponse<any>> {
     return await this.rolOrdenadorService.getOrdenadorActual(rol);
   }
