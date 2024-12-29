@@ -47,11 +47,11 @@ export class SupervisorController {
   @ApiOperation({ summary: 'Obtener supervisores por número de documento' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Contratos del supervisor encontrados exitosamente',
+    description: 'Franjas del supervisor encontrados exitosamente',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'No se encontraron contratos para el documento especificado',
+    description: 'No se encontraron Franjas para el documento especificado',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,

@@ -71,11 +71,11 @@ paths:
             type: string
       responses:
         '200':
-          description: Contratos del supervisor encontrados exitosamente
+          description: Franjas del supervisor encontrados exitosamente
         '400':
           description: Formato de documento inválido
         '404':
-          description: No se encontraron contratos para el documento especificado
+          description: No se encontraron Franjas para el documento especificado
         '500':
           description: Error interno del servidor
       summary: Obtener supervisores por número de documento
