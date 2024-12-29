@@ -7,10 +7,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { SupervisorService } from './supervisor.service';
-import { SupervisorQueryDto } from './dto/supervisor-dto';
+import {
+  SupervisorDependenciaDto,
+  SupervisorDocumentoDto,
+} from './dto/supervisor-dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
-import { Dependencia } from '../interfaces/internal.interfaces';
+import { Contrato, Dependencia } from '../interfaces/internal.interfaces';
 
 @ApiTags('Supervisores')
 @Controller('supervisor')
@@ -34,8 +37,34 @@ export class SupervisorController {
   })
   async getSupervisorDependencia(
     @Query(new ValidationPipe({ transform: true }))
-    queryParams: SupervisorQueryDto,
+    queryParams: SupervisorDependenciaDto,
   ): Promise<StandardResponse<Dependencia[]>> {
-    return this.supervisorService.getSupervisores(queryParams);
+    return this.supervisorService.getSupervisorPorDependencia(queryParams);
+  }
+
+  @Get('documento')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Obtener supervisores por número de documento' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Contratos del supervisor encontrados exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No se encontraron contratos para el documento especificado',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Formato de documento inválido',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Error interno del servidor',
+  })
+  async getSupervisorPorDocumento(
+    @Query(new ValidationPipe({ transform: true }))
+    params: SupervisorDocumentoDto,
+  ): Promise<StandardResponse<Contrato[]>> {
+    return this.supervisorService.getSupervisorPorDocumento(params);
   }
 }

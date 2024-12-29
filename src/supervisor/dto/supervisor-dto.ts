@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SupervisorQueryDto {
+export class SupervisorDependenciaDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -17,4 +17,17 @@ export class SupervisorQueryDto {
     example: '2024-12-29',
   })
   fecha: string;
+}
+
+export class SupervisorDocumentoDto {
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d+$/, {
+    message: 'El documento debe contener solo números',
+  })
+  @ApiProperty({
+    description: 'Número de documento del supervisor',
+    example: '123456789',
+  })
+  documento: string;
 }

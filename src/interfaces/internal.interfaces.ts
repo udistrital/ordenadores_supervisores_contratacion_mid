@@ -32,3 +32,22 @@ export interface Dependencia {
   digito_verificacion: string;
   sede_supervisor: string;
 }
+
+export interface SupervisorDocumentoResponse {
+  supervisor: {
+    contrato: Contrato[];
+  };
+}
+
+export interface Contrato {
+  dependencia_supervisor: string;
+  estado: boolean;
+  fecha_inicio: string;
+  fecha_fin: string;
+  cargo_id: number;
+  documento: string;
+  cargo: string;
+  nombre: string;
+  digito_verificacion: string;
+  sede_supervisor: string;
+}

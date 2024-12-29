@@ -1,30 +1,44 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { SupervisorQueryDto } from './dto/supervisor-dto';
+import {
+  SupervisorDependenciaDto,
+  SupervisorDocumentoDto,
+} from './dto/supervisor-dto';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError } from 'axios';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
 import {
   SupervidorDependenciaResponse,
   Dependencia,
+  Contrato,
+  SupervisorDocumentoResponse,
 } from '../interfaces/internal.interfaces';
 
 @Injectable()
 export class SupervisorService {
   private readonly logger = new Logger(SupervisorService.name);
-  private readonly supervisorEndpoint: string;
+  private readonly supervisorDependenciaEndpoint: string;
+  private readonly supervisorDocumentoEndpoint: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.supervisorEndpoint = this.configService.get<string>(
+    this.supervisorDependenciaEndpoint = this.configService.get<string>(
       'ENDP_SUPERVISOR_DEPENDENCIA',
     );
 
-    if (!this.supervisorEndpoint) {
-      throw new Error('ENDP_SUPERVISOR_DEPENDENCIA configuration is missing');
+    if (!this.supervisorDependenciaEndpoint) {
+      throw new Error('No se ha detectado ENDP_SUPERVISOR_DEPENDENCIA');
+    }
+
+    this.supervisorDocumentoEndpoint = this.configService.get<string>(
+      'ENDP_SUPERVISOR_POR_DOCUMENTO',
+    );
+
+    if (!this.supervisorDocumentoEndpoint) {
+      throw new Error('No se ha detectado ENDP_SUPERVISOR_POR_DOCUMENTO');
     }
   }
 
-  async getSupervisores(
-    queryParams: SupervisorQueryDto,
+  async getSupervisorPorDependencia(
+    queryParams: SupervisorDependenciaDto,
   ): Promise<StandardResponse<Dependencia[]>> {
     try {
       const url = this.buildSupervisorUrl(queryParams);
@@ -48,12 +62,48 @@ export class SupervisorService {
     }
   }
 
-  private buildSupervisorUrl(queryParams: SupervisorQueryDto): string {
-    return `${this.supervisorEndpoint}/${queryParams.dependencia}/${queryParams.fecha}`;
+  private buildSupervisorUrl(queryParams: SupervisorDependenciaDto): string {
+    return `${this.supervisorDependenciaEndpoint}/${queryParams.dependencia}/${queryParams.fecha}`;
   }
 
-  private handleError(error: unknown): StandardResponse<Dependencia[]> {
-    this.logger.error('Error en getSupervisores:', error);
+  async getSupervisorPorDocumento(
+    params: SupervisorDocumentoDto,
+  ): Promise<StandardResponse<Contrato[]>> {
+    try {
+      const url = `${this.supervisorDocumentoEndpoint}/${params.documento}`;
+      const { data } = await axios.get<SupervisorDocumentoResponse>(url);
+
+      if (!data?.supervisor?.contrato?.length) {
+        throw new HttpException(
+          'No se encontraron contratos para el documento especificado',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const contratosOrdenados = this.ordenarContratos(
+        data.supervisor.contrato,
+      );
+
+      return {
+        Success: true,
+        Status: HttpStatus.OK,
+        Message: 'Franjas del supervisor encontrados exitosamente',
+        Data: contratosOrdenados,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  private ordenarContratos(contratos: Contrato[]): Contrato[] {
+    return [...contratos].sort(
+      (a, b) =>
+        new Date(b.fecha_inicio).getTime() - new Date(a.fecha_inicio).getTime(),
+    );
+  }
+
+  private handleError(error: unknown): StandardResponse<any> {
+    this.logger.error('Error en SupervisorService:', error);
 
     if (error instanceof HttpException) {
       return {
