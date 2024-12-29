@@ -75,7 +75,7 @@ export class SupervisorService {
 
       if (!data?.supervisor?.contrato?.length) {
         throw new HttpException(
-          'No se encontraron contratos para el documento especificado',
+          'No se encontraron franjas para el documento especificado',
           HttpStatus.NOT_FOUND,
         );
       }
