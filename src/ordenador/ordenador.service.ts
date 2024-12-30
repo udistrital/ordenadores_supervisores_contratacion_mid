@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { Ordenador } from 'src/interfaces/internal.interfaces';
@@ -10,14 +10,14 @@ export class OrdenadorService {
 
   async getOrdenadores(rol: number): Promise<StandardResponse<Ordenador[]>> {
     try {
-      const endpoint: string = this.configService.get<string>('ENDP_ORDENADORES');
+      const endpoint: string =
+        this.configService.get<string>('ENDP_ORDENADORES');
       const { data } = await axios.get<Ordenador[]>(endpoint);
 
       const filteredOrdenadores = data.filter(
-        ordenador => ordenador.cargo_id === rol
+        (ordenador) => ordenador.cargo_id === rol,
       );
 
-      // Si no hay ordenadores para el rol especificado
       if (filteredOrdenadores.length === 0) {
         return {
           Success: false,
@@ -30,7 +30,7 @@ export class OrdenadorService {
         Success: true,
         Status: HttpStatus.OK,
         Message: 'Ordenadores recuperados exitosamente',
-        Data: filteredOrdenadores
+        Data: filteredOrdenadores,
       };
     } catch (error) {
       return {

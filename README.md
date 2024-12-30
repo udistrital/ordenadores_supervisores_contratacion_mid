@@ -10,9 +10,10 @@ API MID intermediaria entre el cliente ARGOv2 y el API de <>.
 
 ### Variables de Entorno
 ```shell
-ENDP_
-ENDP_
-
+ENDP_ORDENADORES
+ENDP_ROL_ORDENADOR
+ENDP_SUPERVISOR_POR_DOCUMENTO
+ENDP_SUPERVISOR_DEPENDENCIA
 ```
 **NOTA:** Las variables se asignan en una archivo privado .env.
 

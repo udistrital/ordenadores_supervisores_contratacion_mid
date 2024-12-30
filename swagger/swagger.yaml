@@ -30,15 +30,56 @@ paths:
       summary: Consulta ordenadores por cargo
       tags:
         - Ordenador
-  /supervisor:
+  /supervisor/dependencia:
     get:
-      operationId: SupervisorController_getSupervisores
-      parameters: []
+      operationId: SupervisorController_getSupervisorDependencia
+      parameters:
+        - name: dependencia
+          required: true
+          in: query
+          description: ID de la dependencia
+          schema:
+            example: DEP123
+            type: string
+        - name: fecha
+          required: true
+          in: query
+          description: Fecha de consulta (YYYY-MM-DD)
+          schema:
+            example: '2024-12-29'
+            type: string
       responses:
         '200':
-          description: ''
-      tags:
-        - Supervisor
+          description: Supervisores encontrados exitosamente
+        '404':
+          description: No se encontraron supervisores
+        '500':
+          description: Error interno del servidor
+      summary: Obtener supervisores por dependencia
+      tags: &ref_0
+        - Supervisores
+  /supervisor/documento:
+    get:
+      operationId: SupervisorController_getSupervisorPorDocumento
+      parameters:
+        - name: documento
+          required: true
+          in: query
+          description: Número de documento del supervisor
+          schema:
+            example: '123456789'
+            type: string
+      responses:
+        '200':
+          description: Franjas del supervisor encontrados exitosamente
+        '400':
+          description: Formato de documento inválido
+        '404':
+          description: No se encontraron Franjas para el documento especificado
+        '500':
+          description: Error interno del servidor
+      summary: Obtener supervisores por número de documento
+      tags: *ref_0
   /rol-ordenador:
     get:
       operationId: RolOrdenadorController_getOrdenadores
@@ -47,7 +88,7 @@ paths:
         '200':
           description: ''
       summary: Consulta roles de ordenadores
-      tags: &ref_0
+      tags: &ref_1
         - RolOrdenador
   /rol-ordenador/actual:
     get:
@@ -68,7 +109,7 @@ paths:
         '500':
           description: Error interno del servidor
       summary: Consulta el ordenador actual por cargo
-      tags: *ref_0
+      tags: *ref_1
 info:
   title: Ordenadores Supervisores API MID
   description: API
