@@ -116,8 +116,6 @@ export class RolOrdenadorService {
         transformResponse: [(data) => data],
       });
 
-      console.log(response.data);
-
       const parsedData = await this.parseResponse(response.data);
 
       if (parsedData.ordenador && parsedData.ordenador.fechas) {
