@@ -7,7 +7,7 @@ import * as xml2js from 'xml2js';
 @Injectable()
 export class RolOrdenadorService {
   private readonly logger = new Logger(RolOrdenadorService.name);
-  private readonly TIMEOUT = 30000; // 30 segundos
+  private readonly TIMEOUT = 15000;
 
   constructor(private configService: ConfigService) {}
 
