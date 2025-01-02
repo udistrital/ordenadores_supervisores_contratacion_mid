@@ -20,7 +20,7 @@ describe('AppController', () => {
     it('debería devolver una respuesta exitosa del health check', () => {
       const expectedResult = {
         Status: 'ok',
-        checkCount: 1
+        checkCount: 1,
       };
       jest.spyOn(appService, 'healthCheck').mockReturnValue(expectedResult);
 
@@ -33,7 +33,7 @@ describe('AppController', () => {
     it('debería devolver una respuesta de error cuando el health check falla', () => {
       const expectedError = {
         Status: 'error',
-        error: 'Servicio no disponible'
+        error: 'Servicio no disponible',
       };
       jest.spyOn(appService, 'healthCheck').mockReturnValue(expectedError);
 

@@ -107,6 +107,7 @@ export class RolOrdenadorService {
     try {
       const endpoint: string =
         this.configService.get<string>('ENDP_ROL_ORDENADOR');
+
       const fechaActual = new Date().toISOString().split('T')[0];
       const url = `${endpoint}/ordenador_fecha?fecha_fin=${fechaActual}&rol_id=${rol}`;
 
@@ -115,6 +116,8 @@ export class RolOrdenadorService {
         timeout: this.TIMEOUT,
         transformResponse: [(data) => data],
       });
+
+      this.logger.log(response.data);
 
       const parsedData = await this.parseResponse(response.data);
 

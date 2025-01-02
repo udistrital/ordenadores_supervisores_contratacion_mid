@@ -1,17 +1,33 @@
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class SupervisorQueryDto {
-
-  //Posible data a traer
-  @IsBoolean()
-  @IsOptional()
-  Estado?: boolean;
-
+export class SupervisorDependenciaDto {
   @IsString()
-  @IsOptional()
-  SedeSupervisor?: string;
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'ID de la dependencia',
+    example: 'DEP123',
+  })
+  dependencia: string;
 
+  @IsDateString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Fecha de consulta (YYYY-MM-DD)',
+    example: '2024-12-29',
+  })
+  fecha: string;
+}
+
+export class SupervisorDocumentoDto {
   @IsString()
-  @IsOptional()
-  DependenciaSupervisor?: string;
+  @IsNotEmpty()
+  @Matches(/^\d+$/, {
+    message: 'El documento debe contener solo números',
+  })
+  @ApiProperty({
+    description: 'Número de documento del supervisor',
+    example: '123456789',
+  })
+  documento: string;
 }
