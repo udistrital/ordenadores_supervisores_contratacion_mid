@@ -46,8 +46,12 @@ export class SupervisorService {
         `Dependencia no encontrada en el diccionario: ${dependenciaId}`,
       );
       throw new HttpException(
-        'El ID de dependencia proporcionado no es válido',
-        HttpStatus.BAD_REQUEST,
+        {
+          Success: false,
+          Status: HttpStatus.NOT_FOUND,
+          Message: `No se encontró la dependencia con identificador: ${dependenciaId}. Por favor, verifique el ID proporcionado.`,
+        },
+        HttpStatus.NOT_FOUND,
       );
     }
 
@@ -59,17 +63,21 @@ export class SupervisorService {
   ): Promise<StandardResponse<Dependencia[]>> {
     try {
       const dependenciaLegacy = this.validateAndTransformDependencia(
-        queryParams.dependencia,
+        queryParams.dependenciaId,
       );
       const url = this.buildSupervisorUrl({
         ...queryParams,
-        dependencia: dependenciaLegacy,
+        dependenciaId: dependenciaLegacy,
       });
       const { data } = await axios.get<SupervidorDependenciaResponse>(url);
 
       if (!data?.supervisor?.dependencia) {
         throw new HttpException(
-          'No se encontraron datos de supervisores',
+          {
+            Success: false,
+            Status: HttpStatus.NOT_FOUND,
+            Message: `No se encontraron supervisores para la dependencia ${queryParams.dependenciaId} en la fecha ${queryParams.fecha}`,
+          },
           HttpStatus.NOT_FOUND,
         );
       }
@@ -81,13 +89,12 @@ export class SupervisorService {
         Data: data.supervisor.dependencia,
       };
     } catch (error) {
-      this.logger.error('Error en SupervisorService:', error);
-      return null;
+      return this.handleError(error);
     }
   }
 
   private buildSupervisorUrl(queryParams: SupervisorDependenciaDto): string {
-    return `${this.supervisorDependenciaEndpoint}/${queryParams.dependencia}/${queryParams.fecha}`;
+    return `${this.supervisorDependenciaEndpoint}/${queryParams.dependenciaId}/${queryParams.fecha}`;
   }
 
   async getSupervisorPorDocumento(
@@ -130,28 +137,35 @@ export class SupervisorService {
     this.logger.error('Error en SupervisorService:', error);
 
     if (error instanceof HttpException) {
+      const errorResponse = error.getResponse();
+      const errorMessage =
+        typeof errorResponse === 'object'
+          ? (errorResponse as any).Message || error.message
+          : error.message;
+
       return {
         Success: false,
         Status: error.getStatus(),
-        Message: error.message,
+        Message: errorMessage,
       };
     }
 
     if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<{ message: string }>; // Tipamos la respuesta
       return {
         Success: false,
         Status: axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
         Message:
-          axiosError.message ||
-          'Error en la comunicación con el servicio externo',
+          axiosError.response?.data?.message ||
+          `Error en la comunicación con el servicio externo: ${axiosError.code || 'Unknown error'}`,
       };
     }
 
     return {
       Success: false,
       Status: HttpStatus.INTERNAL_SERVER_ERROR,
-      Message: 'Error interno del servidor',
+      Message:
+        error instanceof Error ? error.message : 'Error interno del servidor',
     };
   }
 }

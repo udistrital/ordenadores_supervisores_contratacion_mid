@@ -16,7 +16,7 @@ import { StandardResponse } from 'src/interfaces/responses.interfaces';
 import { Contrato, Dependencia } from '../interfaces/internal.interfaces';
 
 @ApiTags('Supervisores')
-@Controller('supervisor')
+@Controller('supervisores')
 export class SupervisorController {
   constructor(private readonly supervisorService: SupervisorService) {}
 
