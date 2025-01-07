@@ -4,3 +4,8 @@ export interface StandardResponse<T> {
   Message: string;
   Data?: T;
 }
+
+export interface UsuarioResponse {
+  Id: number;
+  NombreCompleto: string;
+}
