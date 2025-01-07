@@ -6,9 +6,9 @@ export class SupervisorDependenciaDto {
   @IsNotEmpty()
   @ApiProperty({
     description: 'ID de la dependencia',
-    example: 'DEP123',
+    example: '123',
   })
-  dependencia: string;
+  dependenciaId: string;
 
   @IsDateString()
   @IsNotEmpty()
