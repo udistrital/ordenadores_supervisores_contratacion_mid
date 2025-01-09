@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Query,
   ParseIntPipe,
+  HttpException,
 } from '@nestjs/common';
 import { RolOrdenadorService } from './rol_ordenador.service';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
@@ -17,6 +18,9 @@ export class RolOrdenadorController {
   @ApiOperation({ summary: 'Consulta roles de ordenadores' })
   async getOrdenadores(): Promise<StandardResponse<any>> {
     const result = await this.rolOrdenadorService.getRolOrdenadores();
+    if (!result.Success) {
+      throw new HttpException(result, result.Status);
+    }
     return result;
   }
 
@@ -43,6 +47,10 @@ export class RolOrdenadorController {
     )
     rol: number,
   ): Promise<StandardResponse<any>> {
-    return await this.rolOrdenadorService.getOrdenadorActual(rol);
+    const result = await this.rolOrdenadorService.getOrdenadorActual(rol);
+    if (!result.Success) {
+      throw new HttpException(result, result.Status);
+    }
+    return result;
   }
 }

@@ -1,12 +1,13 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
 import * as xml2js from 'xml2js';
 
 @Injectable()
 export class RolOrdenadorService {
   private readonly logger = new Logger(RolOrdenadorService.name);
+  private readonly TIMEOUT = 15000;
 
   constructor(private configService: ConfigService) {}
 
@@ -14,6 +15,7 @@ export class RolOrdenadorService {
     try {
       return JSON.parse(responseData);
     } catch (error) {
+      this.logger.error(`Error al parsear respuesta: ${error.message}`);
       return this.parseXml(responseData);
     }
   }
@@ -42,11 +44,8 @@ export class RolOrdenadorService {
 
       const response = await axios.get(url, {
         responseType: 'text',
-        transformResponse: [
-          (data) => {
-            return data;
-          },
-        ],
+        timeout: this.TIMEOUT,
+        transformResponse: [(data) => data],
       });
 
       const parsedData = await this.parseResponse(response.data);
@@ -73,16 +72,33 @@ export class RolOrdenadorService {
         };
       }
 
+      throw new Error('Formato de respuesta inesperado');
+    } catch (error) {
+      this.logger.error(`Error en getRolOrdenadores: ${error.message}`);
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+
+        if (error.code === 'ECONNABORTED') {
+          return {
+            Success: false,
+            Status: HttpStatus.REQUEST_TIMEOUT,
+            Message: 'Tiempo de espera agotado',
+          };
+        }
+
+        return {
+          Success: false,
+          Status:
+            axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+          Message: 'Error al consultar los roles de ordenadores',
+        };
+      }
+
       return {
         Success: false,
         Status: HttpStatus.INTERNAL_SERVER_ERROR,
-        Message: 'Formato de respuesta inesperado',
-      };
-    } catch (error) {
-      return {
-        Success: false,
-        Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
-        Message: error.message || 'Error al consultar los roles de ordenadores',
+        Message: error.message || 'Error interno del servidor',
       };
     }
   }
@@ -97,11 +113,8 @@ export class RolOrdenadorService {
 
       const response = await axios.get(url, {
         responseType: 'text',
-        transformResponse: [
-          (data) => {
-            return data;
-          },
-        ],
+        timeout: this.TIMEOUT,
+        transformResponse: [(data) => data],
       });
 
       this.logger.log(response.data);
@@ -130,16 +143,33 @@ export class RolOrdenadorService {
         };
       }
 
+      throw new Error('Formato de respuesta inesperado');
+    } catch (error) {
+      this.logger.error(`Error en getOrdenadorActual: ${error.message}`);
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+
+        if (error.code === 'ECONNABORTED') {
+          return {
+            Success: false,
+            Status: HttpStatus.REQUEST_TIMEOUT,
+            Message: 'Tiempo de espera agotado',
+          };
+        }
+
+        return {
+          Success: false,
+          Status:
+            axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+          Message: 'Error al consultar los roles de ordenadores',
+        };
+      }
+
       return {
         Success: false,
         Status: HttpStatus.INTERNAL_SERVER_ERROR,
-        Message: 'Formato de respuesta inesperado',
-      };
-    } catch (error) {
-      return {
-        Success: false,
-        Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
-        Message: error.message || 'Error al consultar los roles de ordenadores',
+        Message: error.message || 'Error interno del servidor',
       };
     }
   }

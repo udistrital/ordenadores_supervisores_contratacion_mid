@@ -30,16 +30,16 @@ paths:
       summary: Consulta ordenadores por cargo
       tags:
         - Ordenador
-  /supervisor/dependencia:
+  /supervisores/dependencia:
     get:
       operationId: SupervisorController_getSupervisorDependencia
       parameters:
-        - name: dependencia
+        - name: dependenciaId
           required: true
           in: query
           description: ID de la dependencia
           schema:
-            example: DEP123
+            example: '123'
             type: string
         - name: fecha
           required: true
@@ -58,7 +58,7 @@ paths:
       summary: Obtener supervisores por dependencia
       tags: &ref_0
         - Supervisores
-  /supervisor/documento:
+  /supervisores/documento:
     get:
       operationId: SupervisorController_getSupervisorPorDocumento
       parameters:

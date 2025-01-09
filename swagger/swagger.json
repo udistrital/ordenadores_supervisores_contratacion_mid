@@ -48,17 +48,17 @@
         ]
       }
     },
-    "/supervisor/dependencia": {
+    "/supervisores/dependencia": {
       "get": {
         "operationId": "SupervisorController_getSupervisorDependencia",
         "parameters": [
           {
-            "name": "dependencia",
+            "name": "dependenciaId",
             "required": true,
             "in": "query",
             "description": "ID de la dependencia",
             "schema": {
-              "example": "DEP123",
+              "example": "123",
               "type": "string"
             }
           },
@@ -90,7 +90,7 @@
         ]
       }
     },
-    "/supervisor/documento": {
+    "/supervisores/documento": {
       "get": {
         "operationId": "SupervisorController_getSupervisorPorDocumento",
         "parameters": [
