@@ -5,7 +5,7 @@ import {
 } from './dto/supervisor-dto';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError } from 'axios';
-import { StandardResponse } from 'src/interfaces/responses.interfaces';
+import { StandardResponse, UsuarioResponse } from 'src/interfaces/responses.interfaces';
 import {
   SupervidorDependenciaResponse,
   Dependencia,
@@ -70,7 +70,7 @@ export class SupervisorService {
         dependenciaId: dependenciaLegacy,
       });
       const { data } = await axios.get<SupervidorDependenciaResponse>(url);
-
+  
       if (!data?.supervisor?.dependencia) {
         throw new HttpException(
           {
@@ -81,12 +81,32 @@ export class SupervisorService {
           HttpStatus.NOT_FOUND,
         );
       }
-
+  
+      const dependenciasConTerceroId = await Promise.all(
+        data.supervisor.dependencia.map(async (dependencia) => {
+          try {
+            const terceroInfo = await this.obtenerTercero(Number(dependencia.documento));
+            // Accedemos al primer elemento del array y luego al Id del Tercero
+            const terceroId = Array.isArray(terceroInfo) ? terceroInfo[0]?.Tercero?.Id : null;
+            return {
+              ...dependencia,
+              tercero_id: terceroId
+            };
+          } catch (error) {
+            this.logger.warn(`Error al obtener tercero para documento ${dependencia.documento}: ${error.message}`);
+            return {
+              ...dependencia,
+              tercero_id: null
+            };
+          }
+        })
+      );
+  
       return {
         Success: true,
         Status: HttpStatus.OK,
         Message: 'Supervisores encontrados exitosamente',
-        Data: data.supervisor.dependencia,
+        Data: dependenciasConTerceroId,
       };
     } catch (error) {
       return this.handleError(error);
@@ -99,22 +119,28 @@ export class SupervisorService {
 
   async getSupervisorPorDocumento(
     params: SupervisorDocumentoDto,
-  ): Promise<StandardResponse<Contrato[]>> {
+  ): Promise<StandardResponse<(Contrato & { tercero_id?: number })[]>> {
     try {
       const url = `${this.supervisorDocumentoEndpoint}/${params.documento}`;
       const { data } = await axios.get<SupervisorDocumentoResponse>(url);
-
+  
       if (!data?.supervisor?.contrato?.length) {
         throw new HttpException(
           'No se encontraron franjas para el documento especificado',
           HttpStatus.NOT_FOUND,
         );
       }
-
-      const contratosOrdenados = this.ordenarContratos(
-        data.supervisor.contrato,
-      );
-
+  
+      const terceroInfo = await this.obtenerTercero(Number(params.documento));
+      const terceroId = Array.isArray(terceroInfo) ? terceroInfo[0]?.Tercero?.Id : null;
+  
+      const contratosConTerceroId = data.supervisor.contrato.map(contrato => ({
+        ...contrato,
+        tercero_id: terceroId
+      }));
+  
+      const contratosOrdenados = this.ordenarContratos(contratosConTerceroId);
+  
       return {
         Success: true,
         Status: HttpStatus.OK,
@@ -126,7 +152,7 @@ export class SupervisorService {
     }
   }
 
-  private ordenarContratos(contratos: Contrato[]): Contrato[] {
+  private ordenarContratos<T extends Contrato>(contratos: T[]): T[] {
     return [...contratos].sort(
       (a, b) =>
         new Date(b.fecha_inicio).getTime() - new Date(a.fecha_inicio).getTime(),
@@ -151,7 +177,7 @@ export class SupervisorService {
     }
 
     if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<{ message: string }>; // Tipamos la respuesta
+      const axiosError = error as AxiosError<{ message: string }>;
       return {
         Success: false,
         Status: axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -167,5 +193,23 @@ export class SupervisorService {
       Message:
         error instanceof Error ? error.message : 'Error interno del servidor',
     };
+  }
+
+  async obtenerTercero(id: number): Promise<UsuarioResponse> {
+    try {
+      const endpoint: string =
+        this.configService.get<string>('ENDP_TERCEROS_CRUD');
+
+      if (!endpoint) {
+        throw new Error('No se encontró la URL del servicio de terceros');
+      }
+
+      const { data } = await axios.get<UsuarioResponse>(
+        `${endpoint}tercero/identificacion?query=${id}`,
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
   }
 }
