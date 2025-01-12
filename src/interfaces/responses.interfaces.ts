@@ -5,7 +5,16 @@ export interface StandardResponse<T> {
   Data?: T;
 }
 
-export interface UsuarioResponse {
-  Id: number;
-  NombreCompleto: string;
-}
+export interface UsuarioResponse extends Array<{
+  Tercero: {
+    Id: number;
+    NombreCompleto: string;
+  };
+  Identificacion: {
+    Numero: string;
+    DigitoVerificacion: number;
+    TipoDocumentoId: {
+      CodigoAbreviacion: string;
+    };
+  };
+}> {}
