@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError } from 'axios';
-import { StandardResponse } from 'src/interfaces/responses.interfaces';
+import { StandardResponse, UsuarioResponse } from 'src/interfaces/responses.interfaces';
 import * as xml2js from 'xml2js';
 
 @Injectable()
@@ -135,11 +135,31 @@ export class RolOrdenadorService {
           };
         }
 
+        // Agregar tercero_id a cada ordenador
+        const ordenadoresConTerceroId = await Promise.all(
+          ordenadoresArray.map(async (ordenador) => {
+            try {
+              const terceroInfo = await this.obtenerTercero(Number(ordenador.documento_identidad));
+              const terceroId = Array.isArray(terceroInfo) ? terceroInfo[0]?.Tercero?.Id : null;
+              return {
+                ...ordenador,
+                tercero_id: terceroId
+              };
+            } catch (error) {
+              this.logger.warn(`Error al obtener tercero para documento ${ordenador.documento_identidad}: ${error.message}`);
+              return {
+                ...ordenador,
+                tercero_id: null
+              };
+            }
+          })
+        );
+
         return {
           Success: true,
           Status: HttpStatus.OK,
           Message: 'Roles de ordenadores recuperados exitosamente',
-          Data: ordenadoresArray,
+          Data: ordenadoresConTerceroId,
         };
       }
 
@@ -171,6 +191,24 @@ export class RolOrdenadorService {
         Status: HttpStatus.INTERNAL_SERVER_ERROR,
         Message: error.message || 'Error interno del servidor',
       };
+    }
+  }
+
+  async obtenerTercero(id: number): Promise<UsuarioResponse> {
+    try {
+      const endpoint: string =
+        this.configService.get<string>('ENDP_TERCEROS_CRUD');
+
+      if (!endpoint) {
+        throw new Error('No se encontró la URL del servicio de terceros');
+      }
+
+      const { data } = await axios.get<UsuarioResponse>(
+        `${endpoint}tercero/identificacion?query=${id}`,
+      );
+      return data;
+    } catch (error) {
+      return null;
     }
   }
 }
