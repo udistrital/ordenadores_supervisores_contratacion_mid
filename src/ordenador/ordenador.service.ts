@@ -1,42 +1,43 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { Ordenador } from 'src/interfaces/internal.interfaces';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
 
 @Injectable()
 export class OrdenadorService {
   constructor(private configService: ConfigService) {}
 
-  async getOrdenadores(rol: number): Promise<StandardResponse<Ordenador[]>> {
+  async getOrdenador(idArgoContrato: number): Promise<StandardResponse<any>> {
     try {
-      const endpoint: string =
-        this.configService.get<string>('ENDP_ORDENADORES');
-      const { data } = await axios.get<Ordenador[]>(endpoint);
+      const urlRolOrdenador: string =
+        this.configService.get<string>('ENDP_ROL_ORDENADOR');
 
-      const filteredOrdenadores = data.filter(
-        (ordenador) => ordenador.cargo_id === rol,
-      );
+      const url = `${urlRolOrdenador}/ordenadores/${idArgoContrato}`;
+      const { data } = await axios.get<any>(url);
 
-      if (filteredOrdenadores.length === 0) {
+      if (
+        !data ||
+        !data.ordenadores?.ordenador ||
+        data.ordenadores?.ordenador?.length === 0
+      ) {
         return {
           Success: false,
           Status: HttpStatus.NOT_FOUND,
-          Message: `No se encontraron ordenadores para el cargo ${rol}`,
+          Message: `Ordenador no encontrado`,
         };
       }
 
       return {
         Success: true,
         Status: HttpStatus.OK,
-        Message: 'Ordenadores recuperados exitosamente',
-        Data: filteredOrdenadores,
+        Message: 'Ordenador encontrato exitosamente',
+        Data: data.ordenadores?.ordenador[0],
       };
     } catch (error) {
       return {
         Success: false,
         Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
-        Message: error.message || 'Error al consultar los ordenadores',
+        Message: error.message || 'Error interno del servidor',
       };
     }
   }
