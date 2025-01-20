@@ -1,42 +1,30 @@
-import {
-  Controller,
-  Get,
-  HttpStatus,
-  Query,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { OrdenadorService } from './ordenador.service';
 import { StandardResponse } from 'src/interfaces/responses.interfaces';
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { Ordenador } from 'src/interfaces/internal.interfaces';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@Controller('ordenador')
+@ApiTags('Ordenadores')
+@Controller('ordenadores')
 export class OrdenadorController {
   constructor(private readonly ordenadorService: OrdenadorService) {}
 
-  @Get('')
-  @ApiOperation({ summary: 'Consulta ordenadores por cargo' })
-  @ApiQuery({
-    name: 'rol',
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Obtener ordenador Argo por ID',
+  })
+  @ApiParam({
+    name: 'id',
     type: 'number',
+    description: 'ID ordenador Argo',
     required: true,
   })
   @ApiResponse({
     status: 200,
-    description: 'Ordenadores encontrados exitosamente',
+    description: 'Ordenador encontrado exitosamente',
   })
-  @ApiResponse({ status: 400, description: 'Solicitud incorrecta' })
-  @ApiResponse({ status: 404, description: 'Ordenadores no encontrados' })
+  @ApiResponse({ status: 404, description: 'Ordenador no encontrado' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor' })
-  async getOrdenadores(
-    @Query(
-      'rol',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    rol: number,
-  ): Promise<StandardResponse<Ordenador[]>> {
-    return await this.ordenadorService.getOrdenadores(rol);
+  async getOrdenador(@Param('id') id: number): Promise<StandardResponse<any>> {
+    return await this.ordenadorService.getOrdenador(id);
   }
 }
